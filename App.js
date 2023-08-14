@@ -12,6 +12,7 @@ import {
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as Location from "expo-location";
+import { REACT_APP_OPEN_WEATHER_KEY } from "@env";
 
 const Stack = createNativeStackNavigator();
 const londonCoords = {
@@ -102,7 +103,7 @@ const HomeScreen = ({ navigation }) => {
     async function weatherData() {
       try {
         const data = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?lat=${location.latitude}&lon=${location.longitude}&appid=42b4f4c33a3acac786fd199e521a4624&units=metric`,
+          `https://api.openweathermap.org/data/2.5/weather?lat=${location.latitude}&lon=${location.longitude}&appid=${REACT_APP_OPEN_WEATHER_KEY}&units=metric`,
           {
             method: "POST",
             headers: {
@@ -172,26 +173,24 @@ const HomeScreen = ({ navigation }) => {
             </Text>
           </Pressable>
         </View>
-        <View style={styles.weather}>
-          <View style={styles.weatherTitle}>
-            <View
-              style={{
-                display: "flex",
-                flexDirection: "column",
 
-                justifyContent: "flex-start",
-              }}
-            >
-              <Text style={styles.text}>
-                {weather
-                  ? `${weather.title} - ${weather.city}, ${weather.country}`
-                  : `Pick a location, or permit app to use location`}
-              </Text>
-              <Text style={{ ...styles.text, fontSize: 18, color: "#666" }}>
-                {weather ? `${weather.desc}` : ``}
-              </Text>
-            </View>
-            {weather && (
+        {weather ? (
+          <View style={styles.weather}>
+            <View style={styles.weatherTitle}>
+              <View
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "flex-start",
+                }}
+              >
+                <Text style={styles.text}>
+                  {`${weather.title} - ${weather.city}, ${weather.country}`}
+                </Text>
+                <Text style={{ ...styles.text, fontSize: 18, color: "#666" }}>
+                  {weather.desc}
+                </Text>
+              </View>
               <View
                 style={{
                   padding: 2,
@@ -207,33 +206,32 @@ const HomeScreen = ({ navigation }) => {
                   source={iconArr[weather.icon]}
                 />
               </View>
-            )}
+              <Text style={styles.text}>
+                {weather.rain === "none" ? "" : `${weather.rain} mm`}
+              </Text>
+            </View>
+
             <Text style={styles.text}>
-              {weather.rain
-                ? weather.rain === "none"
-                  ? ""
-                  : `${weather.rain} mm`
-                : ""}
+              {`Temps: ${weather.temp.toFixed(
+                0
+              )}°C (min ${weather.tempMin.toFixed(
+                0
+              )}°C max ${weather.tempMax.toFixed(0)}°C)`}
+            </Text>
+            <Text style={styles.text}>
+              {`Feels Like: ${weather.feelsLike.toFixed(0)}°C`}
+            </Text>
+            <Text style={styles.text}>{`Humidity: ${weather.humidity}%`}</Text>
+          </View>
+        ) : (
+          <View style={styles.weather}>
+            <Text style={styles.text}>
+              Pick a location, or permit app to use location{" "}
             </Text>
           </View>
-
-          <Text style={styles.text}>
-            {weather
-              ? `Temps: ${weather.temp.toFixed(
-                  0
-                )}°C (min ${weather.tempMin.toFixed(
-                  0
-                )}°C max ${weather.tempMax.toFixed(0)}°C)`
-              : ``}
-          </Text>
-          <Text style={styles.text}>
-            {weather ? `Feels Like: ${weather.feelsLike.toFixed(0)}°C` : ``}
-          </Text>
-          <Text style={styles.text}>
-            {weather ? `Humidity: ${weather.humidity}%` : ``}
-          </Text>
-        </View>
+        )}
       </View>
+
       <View style={styles.nav}>
         <Button
           color={styles.regalGreen}
