@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { View, Text, Image, Pressable } from "react-native";
 import * as Location from "expo-location";
 import MapView, { Marker } from "react-native-maps";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useDispatch, useSelector } from "react-redux";
 import { add, setCurrent } from "../../redux/reducers/locations";
 import { REACT_APP_OPEN_WEATHER_KEY } from "@env";
@@ -61,7 +62,7 @@ const Home = ({ navigation }) => {
         }
         if (json.cod === "400") {
           setWeather(false);
-          setErr("cunted");
+          setErr("400");
         }
 
         // could use array for state, but want more easy access to each variable in the UI
@@ -129,7 +130,6 @@ const Home = ({ navigation }) => {
             </Pressable>
           </View>
         </View>
-        {errMsg ? <Text style={styles.text}> CUNTED</Text> : ""}
         {weather ? (
           <View style={styles.weather}>
             <Text style={styles.text}>
