@@ -6,44 +6,18 @@ import { useDispatch, useSelector } from "react-redux";
 import { add, setCurrent } from "../../redux/reducers/locations";
 import { REACT_APP_OPEN_WEATHER_KEY } from "@env";
 import styles from "../../style";
+import { londonCoords, iconArr } from "../../lib/home";
 
 const Home = ({ navigation }) => {
-  const dispatch = useDispatch();
-  const iconArr = {
-    "01d": require("../../img/icons/01d.png"),
-    "01n": require("../../img/icons/01n.png"),
-    "02d": require("../../img/icons/02d.png"),
-    "02n": require("../../img/icons/02n.png"),
-    "03d": require("../../img/icons/03d.png"),
-    "03n": require("../../img/icons/03n.png"),
-    "04d": require("../../img/icons/04d.png"),
-    "04n": require("../../img/icons/04n.png"),
-    "09d": require("../../img/icons/09d.png"),
-    "09n": require("../../img/icons/09n.png"),
-    "10d": require("../../img/icons/10d.png"),
-    "10n": require("../../img/icons/10n.png"),
-    "11d": require("../../img/icons/11d.png"),
-    "11n": require("../../img/icons/11n.png"),
-    "13d": require("../../img/icons/13d.png"),
-    "13n": require("../../img/icons/13n.png"),
-    "50d": require("../../img/icons/50d.png"),
-    "50n": require("../../img/icons/50n.png"),
-    unknown: require("../../img/icons/unknown.png"),
-  };
-  const londonCoords = {
-    latitude: 51.50853,
-    longitude: -0.12574,
-    latitudeDelta: 1,
-    longitudeDelta: 1,
-  };
-  const mapRef = useRef();
   const currentLocation = useSelector((state) => state.location.current);
-  const [errorMsg, setErrorMsg] = useState(null);
+  const dispatch = useDispatch();
+  const mapRef = useRef();
   const [weather, setWeather] = useState(false);
+  const [errMsg, setErr] = useState("");
+  // BUTTON HANDLERS
   const getLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
-      setErrorMsg("Permission to access location was denied");
       return;
     }
 
@@ -55,29 +29,19 @@ const Home = ({ navigation }) => {
     dispatch(setCurrent(newObj));
   };
 
-  const saveLocation = async () => {
-    if (!currentLocation) {
+  const saveLocation = () => {
+    if (!currentLocation || !weather) {
       return;
     }
     dispatch(add({ name: weather.city, data: currentLocation }));
-    // const key = weather.city;
-    // const val = JSON.stringify(location);
-    // let allKeys = await AsyncStorage.getAllKeys();
-    // if (allKeys.includes(key)) {
-    //   return;
-    // } else {
-    //   try {
-    //     await AsyncStorage.setItem(key, val);
-    //   } catch (e) {
-    //     console.error(e);
-    //   }
-    // }
   };
 
   const handleMapPress = (event) => {
     dispatch(setCurrent(event.coordinate));
   };
 
+  //? When currentLocation redux state changes, fetch weather data.
+  // todo - perhaps this can go in redux logic?
   useEffect(() => {
     async function weatherData() {
       try {
@@ -95,10 +59,15 @@ const Home = ({ navigation }) => {
         if (!json) {
           return;
         }
+        if (json.cod === "400") {
+          setWeather(false);
+          setErr("cunted");
+        }
+
         // could use array for state, but want more easy access to each variable in the UI
         let newObj = {
-          city: json.name,
-          country: json.sys.country,
+          city: json.name.length > 0 ? json.name : "Unknown",
+          country: json.sys.country ?? "Unknown",
           temp: json.main.temp,
           tempMin: json.main.temp_min,
           tempMax: json.main.temp_max,
@@ -111,18 +80,21 @@ const Home = ({ navigation }) => {
           // windSpeed: json.wind.speed,
           // windDeg: json.wind.deg,
         };
+        console.log(json);
         setWeather(newObj);
+        mapRef.current.animateCamera(
+          {
+            center: currentLocation,
+          },
+          3000
+        );
       } catch (error) {
         console.error(error);
+        setWeather(false);
+        setErr("yes");
       }
-      mapRef.current.animateCamera(
-        {
-          center: currentLocation,
-        },
-        3000
-      );
     }
-    if (currentLocation) weatherData();
+    if (Object.keys(currentLocation).length > 0) weatherData();
   }, [currentLocation]);
 
   return (
@@ -136,10 +108,7 @@ const Home = ({ navigation }) => {
             onPress={(e) => handleMapPress(e.nativeEvent)}
             pointerEvents="none"
           >
-            <Marker
-              coordinate={currentLocation ? currentLocation : londonCoords}
-              title={"Your Marker"}
-            />
+            <Marker coordinate={currentLocation} title={"Your Marker"} />
           </MapView>
           <View style={styles.overlay}>
             <Pressable
@@ -160,7 +129,7 @@ const Home = ({ navigation }) => {
             </Pressable>
           </View>
         </View>
-
+        {errMsg ? <Text style={styles.text}> CUNTED</Text> : ""}
         {weather ? (
           <View style={styles.weather}>
             <Text style={styles.text}>
