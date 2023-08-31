@@ -67,6 +67,10 @@ export default StyleSheet.create({
     borderRadius: 5,
     padding: 8,
     backgroundColor: "#115500",
+    display: "flex",
+    flexDirection: "row",
+    columnGap: 4,
+    alignItems: "center",
   },
 
   locList: {
