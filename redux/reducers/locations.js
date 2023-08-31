@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import Toast from "react-native-root-toast";
 
 const initialState = {
   locations: [],
@@ -18,14 +19,26 @@ export const locationsSlice = createSlice({
         return;
       } else {
         state.locations = [...state.locations, action.payload];
+        Toast.show(`Added ${action.payload.name}`, {
+          duration: 5000,
+          position: Toast.positions.CENTER,
+        });
       }
     },
     remove: (state, action) => {
       state.locations = state.locations.filter(
         (loc) => loc.name !== action.payload.name
       );
+      Toast.show(`Removed ${action.payload.name}`, {
+        duration: 5000,
+        position: Toast.positions.CENTER,
+      });
     },
     clearAll: (state) => {
+      Toast.show(`Clearing all ${state.locations.length} locations`, {
+        duration: 5000,
+        position: Toast.positions.CENTER,
+      });
       state.locations = [];
     },
   },
