@@ -2,12 +2,12 @@ import { useState, useRef, useEffect } from "react";
 import { View, Text, Image, Pressable } from "react-native";
 import * as Location from "expo-location";
 import MapView, { Marker } from "react-native-maps";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
 import { add, setCurrent } from "../../redux/reducers/locations";
-import { REACT_APP_OPEN_WEATHER_KEY } from "@env";
 import styles from "../../style";
 import { londonCoords, iconArr } from "../../lib/home";
+import { getCurrentWeather } from "../../lib/api";
 
 const Home = ({ navigation }) => {
   const currentLocation = useSelector((state) => state.location.current);
@@ -19,6 +19,7 @@ const Home = ({ navigation }) => {
   const getLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
+      //todo - call toast
       return;
     }
 
@@ -32,6 +33,7 @@ const Home = ({ navigation }) => {
 
   const saveLocation = () => {
     if (!currentLocation || !weather) {
+      //todo - call toast
       return;
     }
     dispatch(add({ name: weather.city, data: currentLocation }));
@@ -46,43 +48,13 @@ const Home = ({ navigation }) => {
   useEffect(() => {
     async function weatherData() {
       try {
-        const data = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?lat=${currentLocation.latitude}&lon=${currentLocation.longitude}&appid=${REACT_APP_OPEN_WEATHER_KEY}&units=metric`,
-          {
-            method: "POST",
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        const json = await data.json();
-        if (!json) {
-          return;
-        }
-        if (json.cod === "400") {
-          setWeather(false);
-          setErr("400");
-        }
+        const data = await getCurrentWeather(currentLocation);
+        if (data.error) {
+          //todo - call toast
 
-        // could use array for state, but want more easy access to each variable in the UI
-        let newObj = {
-          city: json.name.length > 0 ? json.name : "Unknown",
-          country: json.sys.country ?? "Unknown",
-          temp: json.main.temp,
-          tempMin: json.main.temp_min,
-          tempMax: json.main.temp_max,
-          feelsLike: json.main.feels_like,
-          humidity: json.main.humidity,
-          rain: json.rain ? json.rain["1h"] : "none",
-          title: json.weather[0].main,
-          desc: json.weather[0].description,
-          icon: json.weather[0].icon,
-          // windSpeed: json.wind.speed,
-          // windDeg: json.wind.deg,
-        };
-        console.log(json);
-        setWeather(newObj);
+          setErr(data.error);
+        }
+        setWeather(data);
         mapRef.current.animateCamera(
           {
             center: currentLocation,
@@ -90,6 +62,8 @@ const Home = ({ navigation }) => {
           3000
         );
       } catch (error) {
+        //todo - call toast
+
         console.error(error);
         setWeather(false);
         setErr("yes");
@@ -116,6 +90,7 @@ const Home = ({ navigation }) => {
               style={styles.styledButton}
               onPress={() => getLocation()}
             >
+              <MaterialIcons name="my-location" size={18} color="white" />
               <Text style={{ ...styles.text, fontWeight: 700 }}>
                 Use My Location
               </Text>
@@ -124,6 +99,7 @@ const Home = ({ navigation }) => {
               style={styles.styledButton}
               onPress={() => saveLocation()}
             >
+              <MaterialIcons name="save" size={18} color="white" />
               <Text style={{ ...styles.text, fontWeight: 700 }}>
                 Save Current location
               </Text>
@@ -205,6 +181,7 @@ const Home = ({ navigation }) => {
             {" "}
             Saved Locations
           </Text>
+          <MaterialIcons name="arrow-forward" size={18} color="white" />
         </Pressable>
       </View>
     </View>
