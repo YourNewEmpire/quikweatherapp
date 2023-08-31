@@ -28,7 +28,11 @@ export default SavedScreen = ({ navigation, route }) => {
               </Text>
             </Pressable>
             <Pressable
-              style={{ ...styles.styledButton, flex: 1, alignItems: "center" }}
+              style={{
+                ...styles.styledButton,
+                flex: 1,
+                justifyContent: "center",
+              }}
               onPress={() => dispatch(remove(loc))}
             >
               <Text style={styles.text}>X</Text>
