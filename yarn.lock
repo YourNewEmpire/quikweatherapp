@@ -5526,10 +5526,10 @@ react-native-root-siblings@^4.0.0:
   resolved "https://registry.yarnpkg.com/react-native-root-siblings/-/react-native-root-siblings-4.1.1.tgz#b7742db7634a87f507eb99a5fd699c4f10c46ab0"
   integrity sha512-sdmLElNs5PDWqmZmj4/aNH4anyxreaPm61c4ZkRiR8SO/GzLg6KjAbb0e17RmMdnBdD0AIQbS38h/l55YKN4ZA==
 
-react-native-root-toast@^3.5.0:
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/react-native-root-toast/-/react-native-root-toast-3.5.0.tgz#71ae39e8e7396faafc191c3cd9a27e4ed13a8c7d"
-  integrity sha512-RwIC0ltKuJlmYG+fhdb7zGT2UzX1TaiaPKEI8J3GEvyMJVhbOsZgHaskzGOCxQOEyPhAVBQKhdLONxHpWMAR5A==
+react-native-root-toast@3.4:
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/react-native-root-toast/-/react-native-root-toast-3.4.1.tgz#8832dcf9d7f6296f689b2c02dd6cab125d9aa040"
+  integrity sha512-rZFoaVZWZiPCcwP9n5a+1KtVM22JNp6pkodluCoRIb5oE2ip8mhpdvlZUIWoM5nxfmL4TBThWDp7se6j4X7lPA==
   dependencies:
     deprecated-react-native-prop-types "^2.3.0"
     prop-types "^15.5.10"
