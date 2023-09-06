@@ -8,32 +8,43 @@ import { add, setCurrent } from "../../redux/reducers/locations";
 import styles from "../../style";
 import { londonCoords, iconArr } from "../../lib/home";
 import { getCurrentWeather } from "../../lib/api";
+import Toast from "react-native-root-toast";
 
 const Home = ({ navigation }) => {
   const currentLocation = useSelector((state) => state.location.current);
   const dispatch = useDispatch();
   const mapRef = useRef();
   const [weather, setWeather] = useState(false);
-  const [errMsg, setErr] = useState("");
   // BUTTON HANDLERS
   const getLocation = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      //todo - call toast
-      return;
-    }
+    Toast.show("Fetching your location...", {
+      position: Toast.positions.CENTER,
+    });
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        return;
+      }
 
-    let loc = await Location.getCurrentPositionAsync({});
-    let newObj = {
-      latitude: loc.coords.latitude,
-      longitude: loc.coords.longitude,
-    };
-    dispatch(setCurrent(newObj));
+      let loc = await Location.getCurrentPositionAsync({});
+      let newObj = {
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+      };
+      dispatch(setCurrent(newObj));
+    } catch (error) {
+      Toast.show("Error getting location!", {
+        position: Toast.positions.CENTER,
+      });
+    }
   };
 
   const saveLocation = () => {
-    if (!currentLocation || !weather) {
-      //todo - call toast
+    if (!currentLocation || !weather.city) {
+      Toast.show("Cannot save this location, no name or coordinates", {
+        position: Toast.positions.CENTER,
+      });
+
       return;
     }
     dispatch(add({ name: weather.city, data: currentLocation }));
@@ -44,34 +55,38 @@ const Home = ({ navigation }) => {
   };
 
   //? When currentLocation redux state changes, fetch weather data.
-  // todo - perhaps this can go in redux logic?
   useEffect(() => {
     async function weatherData() {
       try {
         const data = await getCurrentWeather(currentLocation);
         if (data.error) {
           //todo - call toast
+          Toast.show("there was an error getting weather data", {
+            position: Toast.positions.CENTER,
+          });
 
-          setErr(data.error);
+          setWeather(false);
         }
         setWeather(data);
         mapRef.current.animateCamera(
           {
-            center: currentLocation,
+            center: currentLocation ? currentLocation : londonCoords,
           },
           3000
         );
       } catch (error) {
         //todo - call toast
+        Toast.show("there was an error getting weather data", {
+          position: Toast.positions.CENTER,
+        });
 
         console.error(error);
         setWeather(false);
-        setErr("yes");
       }
     }
     if (Object.keys(currentLocation).length > 0) weatherData();
   }, [currentLocation]);
-
+  //todo - clean to components in home folder.
   return (
     <View style={styles.container}>
       <View style={styles.main}>
@@ -83,12 +98,15 @@ const Home = ({ navigation }) => {
             onPress={(e) => handleMapPress(e.nativeEvent)}
             pointerEvents="none"
           >
-            <Marker coordinate={currentLocation} title={"Your Marker"} />
+            <Marker
+              coordinate={currentLocation ?? londonCoords}
+              title={"Your Marker"}
+            />
           </MapView>
           <View style={styles.overlay}>
             <Pressable
-              style={styles.styledButton}
-              onPress={() => getLocation()}
+              style={{ ...styles.styledButton, justifyContent: "flex-start" }}
+              onPress={getLocation}
             >
               <MaterialIcons name="my-location" size={18} color="white" />
               <Text style={{ ...styles.text, fontWeight: 700 }}>
@@ -96,8 +114,8 @@ const Home = ({ navigation }) => {
               </Text>
             </Pressable>
             <Pressable
-              style={styles.styledButton}
-              onPress={() => saveLocation()}
+              style={{ ...styles.styledButton, justifyContent: "flex-start" }}
+              onPress={saveLocation}
             >
               <MaterialIcons name="save" size={18} color="white" />
               <Text style={{ ...styles.text, fontWeight: 700 }}>
@@ -106,7 +124,7 @@ const Home = ({ navigation }) => {
             </Pressable>
           </View>
         </View>
-        {weather ? (
+        {weather.temp ? (
           <View style={styles.weather}>
             <Text style={styles.text}>
               {`${weather.city}, ${weather.country} `}
@@ -175,7 +193,7 @@ const Home = ({ navigation }) => {
       <View style={styles.nav}>
         <Pressable
           style={styles.styledButton}
-          onPress={() => navigation.navigate("Saved", { name: "Person" })}
+          onPress={() => navigation.navigate("Saved")}
         >
           <Text style={{ ...styles.text, fontWeight: 700 }}>
             {" "}
