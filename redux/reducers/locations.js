@@ -20,7 +20,7 @@ export const locationsSlice = createSlice({
       } else {
         state.locations = [...state.locations, action.payload];
         Toast.show(`Added ${action.payload.name}`, {
-          duration: 5000,
+          duration: 2000,
           position: Toast.positions.CENTER,
         });
       }
@@ -30,13 +30,13 @@ export const locationsSlice = createSlice({
         (loc) => loc.name !== action.payload.name
       );
       Toast.show(`Removed ${action.payload.name}`, {
-        duration: 5000,
+        duration: 2000,
         position: Toast.positions.CENTER,
       });
     },
     clearAll: (state) => {
       Toast.show(`Clearing all ${state.locations.length} locations`, {
-        duration: 5000,
+        duration: 2000,
         position: Toast.positions.CENTER,
       });
       state.locations = [];
