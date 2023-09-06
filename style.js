@@ -70,6 +70,7 @@ export default StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     columnGap: 4,
+    justifyContent: "center",
     alignItems: "center",
   },
 
@@ -82,6 +83,5 @@ export default StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     columnGap: 4,
-    // width: "100%",
   },
 });
